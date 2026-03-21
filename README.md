@@ -47,16 +47,34 @@ lsof -iTCP:8080 -sTCP:LISTEN
 curl -i "http://localhost:8080/userServlet?action=list"
 ```
 
+默认响应为 JSON（方便程序处理），若想以 HTML 表格形式查看可加 `type=HTML`：
+
+```bash
+curl -i "http://localhost:8080/userServlet?action=list&type=HTML"
+```
+
 2. 正常转账（示例：`lucy` → `tom` 转 500）：
 
 ```bash
 curl -i "http://localhost:8080/userServlet?from=lucy&to=tom&amount=500&simulate=false"
 ```
 
+默认返回 JSON；若需要 HTML 表格或页面展示，可添加 `type=HTML`：
+
+```bash
+curl -i "http://localhost:8080/userServlet?from=lucy&to=tom&amount=500&simulate=false&type=HTML"
+```
+
 3. 模拟异常（在借记后抛出异常以触发回滚）：
 
 ```bash
 curl -i "http://localhost:8080/userServlet?from=lucy&to=tom&amount=500&simulate=true"
+```
+
+带 HTML 要求的示例：
+
+```bash
+curl -i "http://localhost:8080/userServlet?from=lucy&to=tom&amount=500&simulate=true&type=HTML"
 ```
 
 演示要点：Service 层使用 `@Transactional`（Spring 的 `DataSourceTransactionManager`），正常调用应提交变更；当 `simulate=true` 时会在借记后抛出运行时异常，期望回滚，账户余额不应发生持久化改变。
@@ -71,20 +89,12 @@ curl -i "http://localhost:8080/userServlet?from=lucy&to=tom&amount=500&simulate=
 - 在 `applicationContext.xml` 中添加 `dataSource`、`jdbcTemplate` 与事务管理器（`DataSourceTransactionManager`）并启用 `<tx:annotation-driven/>`。
 - 新增 `Account` POJO，扩展 `UserDao` 与实现 `UserDaoImpl`（基于 `JdbcTemplate`），实现 `UserServiceImpl.transfer(...)` 并加 `@Transactional`。
 - 修改 `UserServlet` 支持 `action=list` 与通过查询参数发起转账（并可用 `simulate` 参数触发异常）。
-
-**仓库中的证据**
-- `docs/state_before.txt` — 初始账户快照。
-- `docs/transfer_normal_http.txt` — 正常转账的 HTTP 响应文本快照。
-- `docs/state_after_normal.txt` — 正常转账后的账户快照。
-- `docs/transfer_exception_http.txt` — 模拟异常时的 HTTP 响应快照。
-- `docs/state_after_exception.txt` — 异常后账户快照（应显示回滚，无余额变化）。
+ - 修改 `UserServlet` 与 `UserController`：默认返回 JSON，添加 `type` 参数（`type=HTML` 返回 HTML 表格），便于页面展示或程序消费。
 
 **常见问题与排查**
 - 如果 Jetty 无法启动，检查端口占用（8080）并改端口或停止占用进程。
 - 若 JDBC 驱动加载失败，确认 `sqlite-jdbc` 已在 `pom.xml` 中并已 `mvn package` 成功。
 - 若数据看起来未初始化，删除 `database.db` 并重启应用以重新执行 DAO 的 `init` 方法。
-
-如需我把 README 翻译为英文、生成示例请求的截图，或把 `database.db` 移到 `data/` 目录并更新 `db.properties`，告诉我我会继续执行。
 
 ----
 （本 README 于 2026-03-21 根据当前仓库状态自动生成。）

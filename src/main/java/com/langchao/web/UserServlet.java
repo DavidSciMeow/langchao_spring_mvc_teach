@@ -32,7 +32,8 @@ public class UserServlet extends HttpServlet {
         String amountStr = req.getParameter("amount");
         String simulate = req.getParameter("simulate");
 
-        resp.setContentType("text/plain;charset=utf-8");
+        String respType = req.getParameter("type"); // if type=HTML return HTML table, default JSON
+        boolean wantHtml = "HTML".equalsIgnoreCase(respType);
         java.io.PrintWriter out = resp.getWriter();
 
         if (from != null && to != null && amountStr != null) {
@@ -40,9 +41,27 @@ public class UserServlet extends HttpServlet {
             boolean sim = "true".equalsIgnoreCase(simulate);
             try {
                 userService.transfer(from, to, amount, sim);
-                out.println("Transfer completed (from=" + from + ", to=" + to + ", amount=" + amount + ")");
+                if (wantHtml) {
+                    resp.setContentType("text/html;charset=utf-8");
+                    out.println("<html><body>");
+                    out.println("<h3>Transfer completed</h3>");
+                    out.println("<p>from=" + from + ", to=" + to + ", amount=" + amount + "</p>");
+                    out.println("</body></html>");
+                } else {
+                    resp.setContentType("application/json;charset=utf-8");
+                    out.println("{\"success\":true,\"message\":\"Transfer completed\",\"from\":\"" + from + "\",\"to\":\"" + to + "\",\"amount\":" + amount + "}");
+                }
             } catch (Exception e) {
-                out.println("Transfer failed: " + e.getMessage());
+                if (wantHtml) {
+                    resp.setContentType("text/html;charset=utf-8");
+                    out.println("<html><body>");
+                    out.println("<h3>Transfer failed</h3>");
+                    out.println("<pre>" + e.getMessage() + "</pre>");
+                    out.println("</body></html>");
+                } else {
+                    resp.setContentType("application/json;charset=utf-8");
+                    out.println("{\"success\":false,\"message\":\"" + e.getMessage() + "\"}");
+                }
             }
         } else {
             String action = req.getParameter("action");
@@ -50,19 +69,60 @@ public class UserServlet extends HttpServlet {
                 // list accounts
                 try {
                     java.util.List<com.langchao.domain.Account> all = userDao.findAll();
-                    out.println("id\tname\tmoney\taccountNo");
-                    for (com.langchao.domain.Account a : all) {
-                        out.println(a.getId() + "\t" + a.getName() + "\t" + a.getMoney() + "\t" + a.getAccountNo());
+                    if (wantHtml) {
+                        resp.setContentType("text/html;charset=utf-8");
+                        out.println("<html><body>");
+                        out.println("<table border=1><thead><tr><th>id</th><th>name</th><th>money</th><th>accountNo</th></tr></thead><tbody>");
+                        for (com.langchao.domain.Account a : all) {
+                            out.println("<tr><td>" + a.getId() + "</td><td>" + a.getName() + "</td><td>" + a.getMoney() + "</td><td>" + a.getAccountNo() + "</td></tr>");
+                        }
+                        out.println("</tbody></table>");
+                        out.println("</body></html>");
+                    } else {
+                        resp.setContentType("application/json;charset=utf-8");
+                        StringBuilder sb = new StringBuilder();
+                        sb.append('[');
+                        for (int i = 0; i < all.size(); i++) {
+                            com.langchao.domain.Account a = all.get(i);
+                            sb.append('{');
+                            sb.append("\"id\":").append(a.getId()).append(',');
+                            sb.append("\"name\":\"").append(escapeJson(a.getName())).append("\",");
+                            sb.append("\"money\":").append(a.getMoney()).append(',');
+                            sb.append("\"accountNo\":\"").append(escapeJson(a.getAccountNo())).append("\"");
+                            sb.append('}');
+                            if (i < all.size() - 1) sb.append(',');
+                        }
+                        sb.append(']');
+                        out.println(sb.toString());
                     }
                 } catch (Exception e) {
-                    out.println("Failed to list accounts: " + e.getMessage());
+                    if (wantHtml) {
+                        resp.setContentType("text/html;charset=utf-8");
+                        out.println("<html><body><pre>Failed to list accounts: " + e.getMessage() + "</pre></body></html>");
+                    } else {
+                        resp.setContentType("application/json;charset=utf-8");
+                        out.println("{\"success\":false,\"message\":\"Failed to list accounts: " + e.getMessage() + "\"}");
+                    }
                 }
             } else {
-                out.println("No transfer parameters provided. Example: /userServlet?from=lucy&to=tom&amount=500&simulate=false");
+                if (wantHtml) {
+                    resp.setContentType("text/html;charset=utf-8");
+                    out.println("<html><body>");
+                    out.println("<p>No transfer parameters provided. Example: /userServlet?from=lucy&to=tom&amount=500&simulate=false</p>");
+                    out.println("</body></html>");
+                } else {
+                    resp.setContentType("application/json;charset=utf-8");
+                    out.println("{\"success\":false,\"message\":\"No transfer parameters provided. Example: /userServlet?from=lucy&to=tom&amount=500&simulate=false\"}");
+                }
+
             }
         }
 
+    }
 
+    private static String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
     }
 
 }
