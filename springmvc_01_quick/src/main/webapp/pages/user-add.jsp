@@ -8,8 +8,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>数据 - AdminLTE2定制版</title>
-<meta name="description" content="AdminLTE2定制版">
-<meta name="keywords" content="AdminLTE2定制版">
+
 
 <!-- Tell the browser to be responsive to screen width -->
 <meta
@@ -63,7 +62,7 @@
 	href="${pageContext.request.contextPath}/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.css">
 </head>
 
-<body class="hold-transition skin-purple sidebar-mini">
+<body class="hold-transition skin-blue sidebar-mini">
 
 	<div class="wrapper">
 
@@ -79,18 +78,18 @@
 
 			<!-- 内容头部 -->
 			<section class="content-header">
-			<h1>
-				用户管理 <small>用户表单</small>
-			</h1>
-			<ol class="breadcrumb">
-				<li><a href="${pageContext.request.contextPath}/index.jsp"><i
-						class="fa fa-dashboard"></i> 首页</a></li>
-				<li><a
-					href="${pageContext.request.contextPath}/user/findAll.do">用户管理</a></li>
-				<li class="active">用户表单</li>
-			</ol>
-			</section>
-			<!-- 内容头部 /-->
+		h1>
+			用户管理 <small>用户表单</small>
+		</h1>
+		<ol class="breadcrumb">
+			<li><a href="${pageContext.request.contextPath}/index.jsp"><i
+				class="fa fa-dashboard"></i> 首页</a></li>
+			<li><a
+				href="${pageContext.request.contextPath}/user/findAll.do">用户管理</a></li>
+			<li class="active">用户表单</li>
+		</ol>
+		</section>
+		<!-- 内容头部 /-->
 
 			<form action="${pageContext.request.contextPath}/user/save"
 				method="post">
@@ -105,26 +104,23 @@
 						<div class="col-md-4 data">
 							<input type="hidden" name="id" value="${user.id}${param.id}" />
 							<input type="text" class="form-control" name="username"
-								placeholder="用户名称" value="${param.username != null ? param.username : (user != null ? user.username : '')}">
-							<c:if test="${not empty errors and not empty errors.username}">
-								<small class="text-danger">${errors.username}</small>
-							</c:if>
+								placeholder="用户名称" value="${param.username != null ? param.username : (user != null ? user.username : '')}"
+								data-toggle="tooltip" data-placement="top" title="${errors.username}">
+                            
 						</div>
 						<div class="col-md-2 title">密码</div>
 						<div class="col-md-4 data">
 							<input type="password" class="form-control" name="password"
-								placeholder="密码" value="${param.password != null ? param.password : ''}">
-							<c:if test="${not empty errors and not empty errors.password}">
-								<small class="text-danger">${errors.password}</small>
-							</c:if>
+								placeholder="密码" value="${param.password != null ? param.password : ''}"
+								data-toggle="tooltip" data-placement="top" title="${errors.password}">
+                            
 						</div>
 						<div class="col-md-2 title">邮箱</div>
 						<div class="col-md-4 data">
 							<input type="text" class="form-control" name="email"
-								placeholder="邮箱" value="${param.email != null ? param.email : (user != null ? user.email : '')}">
-							<c:if test="${not empty errors and not empty errors.email}">
-								<small class="text-danger">${errors.email}</small>
-							</c:if>
+								placeholder="邮箱" value="${param.email != null ? param.email : (user != null ? user.email : '')}"
+								data-toggle="tooltip" data-placement="top" title="${errors.email}">
+                            
 						</div>
 						<div class="col-md-2 title">联系电话</div>
 						<div class="col-md-4 data">
@@ -267,7 +263,19 @@
 			// WYSIHTML5编辑器
 			$(".textarea").wysihtml5({
 				locale : 'zh-CN'
-			});
+				});
+
+				// Activate Bootstrap tooltips for inputs that have a non-empty title (validation)
+				var $errs = $('[data-toggle="tooltip"]').filter(function(){
+					var t = $(this).attr('title');
+					return typeof t !== 'undefined' && t !== null && $.trim(t) !== '';
+				});
+				$errs.tooltip({container: 'body', placement: 'top', trigger: 'manual'});
+				$errs.tooltip('show');
+				// hide tooltip when user focuses or types in the input
+				$errs.on('focus input propertychange keydown', function(){
+					$(this).tooltip('hide');
+				});
 		});
 
 		// 设置激活菜单

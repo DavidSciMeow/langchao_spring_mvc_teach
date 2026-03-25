@@ -63,7 +63,7 @@
 	href="${pageContext.request.contextPath}/plugins/bootstrap-datetimepicker/bootstrap-datetimepicker.css">
 </head>
 
-	<body class="hold-transition skin-purple sidebar-mini">
+	<body class="hold-transition skin-blue sidebar-mini">
 
 	<div class="wrapper">
 
@@ -104,10 +104,8 @@
 						<div class="col-md-4 data">
 							<input type="hidden" name="id" value="${role.id}${param.id}" />
 							<input type="text" class="form-control" name="roleName"
-								placeholder="角色名称" value="${param.roleName != null ? param.roleName : (role != null ? role.roleName : '')}">
-							<c:if test="${not empty errors and not empty errors.roleName}">
-								<small class="text-danger">${errors.roleName}</small>
-							</c:if>
+								placeholder="角色名称" value="${param.roleName != null ? param.roleName : (role != null ? role.roleName : '')}"
+								data-toggle="tooltip" data-placement="top" title="${errors.roleName}">
 						</div>
 						<div class="col-md-2 title">角色描述</div>
 						<div class="col-md-4 data">
@@ -237,6 +235,18 @@
 			// WYSIHTML5编辑器
 			$(".textarea").wysihtml5({
 				locale : 'zh-CN'
+			});
+
+			// Activate Bootstrap tooltips for inputs that have a non-empty title (validation)
+			var $errs = $('[data-toggle="tooltip"]').filter(function(){
+				var t = $(this).attr('title');
+				return typeof t !== 'undefined' && t !== null && $.trim(t) !== '';
+			});
+			$errs.tooltip({container: 'body', placement: 'top', trigger: 'manual'});
+			$errs.tooltip('show');
+			// hide tooltip when user focuses or types in the input
+			$errs.on('focus input propertychange keydown', function(){
+				$(this).tooltip('hide');
 			});
 		});
 

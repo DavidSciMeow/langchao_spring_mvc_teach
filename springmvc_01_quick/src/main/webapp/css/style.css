@@ -176,4 +176,30 @@
 /* Form labels alignment */
 .data-type .title { text-align: right; padding-right: 18px; }
 
+/* Fix: ensure form inputs float above potential overlaying elements */
+.content-wrapper .data-type .data .form-control {
+	position: relative;
+	z-index: 1100;
+	color: #333; /* ensure text is visible */
+	background-color: #fff; /* ensure input background is visible */
+}
+
+/* If parent containers clip children, make them allow visible overflow */
+.content-wrapper .data-type .data { overflow: visible; }
+
+/* Tooltip: red background for error tooltips */
+.tooltip .tooltip-inner {
+	background-color: #d9534f;
+	color: #fff;
+}
+.tooltip.top .tooltip-arrow { border-top-color: #d9534f; }
+.tooltip.bottom .tooltip-arrow { border-bottom-color: #d9534f; }
+.tooltip.left .tooltip-arrow { border-left-color: #d9534f; }
+.tooltip.right .tooltip-arrow { border-right-color: #d9534f; }
+
+/* Ensure tooltips render above AdminLTE header/panels */
+.tooltip {
+	z-index: 99999 !important;
+}
+
 
