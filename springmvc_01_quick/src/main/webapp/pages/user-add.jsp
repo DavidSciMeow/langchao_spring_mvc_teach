@@ -103,28 +103,46 @@
 
 						<div class="col-md-2 title">用户名称</div>
 						<div class="col-md-4 data">
+							<input type="hidden" name="id" value="${user.id}${param.id}" />
 							<input type="text" class="form-control" name="username"
-								placeholder="用户名称" value="">
+								placeholder="用户名称" value="${param.username != null ? param.username : (user != null ? user.username : '')}">
+							<c:if test="${not empty errors and not empty errors.username}">
+								<small class="text-danger">${errors.username}</small>
+							</c:if>
 						</div>
 						<div class="col-md-2 title">密码</div>
 						<div class="col-md-4 data">
 							<input type="password" class="form-control" name="password"
-								placeholder="密码" value="">
+								placeholder="密码" value="${param.password != null ? param.password : ''}">
+							<c:if test="${not empty errors and not empty errors.password}">
+								<small class="text-danger">${errors.password}</small>
+							</c:if>
 						</div>
 						<div class="col-md-2 title">邮箱</div>
 						<div class="col-md-4 data">
 							<input type="text" class="form-control" name="email"
-								placeholder="邮箱" value="">
+								placeholder="邮箱" value="${param.email != null ? param.email : (user != null ? user.email : '')}">
+							<c:if test="${not empty errors and not empty errors.email}">
+								<small class="text-danger">${errors.email}</small>
+							</c:if>
 						</div>
 						<div class="col-md-2 title">联系电话</div>
 						<div class="col-md-4 data">
 							<input type="text" class="form-control" name="phoneNum"
-								placeholder="联系电话" value="">
+								placeholder="联系电话" value="${param.phoneNum != null ? param.phoneNum : (user != null ? user.phoneNum : '')}">
 						</div>
 						<div class="col-md-2 title">用户角色</div>
 						<div class="col-md-10 data">
 							<c:forEach items="${roleList}" var="role">
-								<input class="" type="checkbox" name="roleIds" value="${role.id}">${role.roleName}
+								<c:set var="checked" value="" />
+								<c:if test="${not empty user and not empty user.roles}">
+									<c:forEach items="${user.roles}" var="ur">
+										<c:if test="${ur.id == role.id}">
+											<c:set var="checked" value="checked" />
+										</c:if>
+									</c:forEach>
+								</c:if>
+								<input class="" type="checkbox" name="roleIds" value="${role.id}" ${checked}>${role.roleName}
 							</c:forEach>
 						</div>
 

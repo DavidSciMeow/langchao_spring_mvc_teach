@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -101,13 +102,17 @@
 
 						<div class="col-md-2 title">角色名称</div>
 						<div class="col-md-4 data">
+							<input type="hidden" name="id" value="${role.id}${param.id}" />
 							<input type="text" class="form-control" name="roleName"
-								placeholder="角色名称" value="">
+								placeholder="角色名称" value="${param.roleName != null ? param.roleName : (role != null ? role.roleName : '')}">
+							<c:if test="${not empty errors and not empty errors.roleName}">
+								<small class="text-danger">${errors.roleName}</small>
+							</c:if>
 						</div>
 						<div class="col-md-2 title">角色描述</div>
 						<div class="col-md-4 data">
 							<input type="text" class="form-control" name="roleDesc"
-								placeholder="角色描述" value="">
+								placeholder="角色描述" value="${param.roleDesc != null ? param.roleDesc : (role != null ? role.roleDesc : '')}">
 						</div>
 										
 

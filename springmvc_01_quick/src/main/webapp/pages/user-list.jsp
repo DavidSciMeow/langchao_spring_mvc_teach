@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -117,26 +118,30 @@
 							<div class="pull-left">
 								<div class="form-group form-inline">
 									<div class="btn-group">
-										<button type="button" class="btn btn-default" title="新建" onclick="location.href='${pageContext.request.contextPath}/user/saveUI'">
-                                            <i class="fa fa-file-o"></i> 新建
-										</button>
-										
-										<button type="button" class="btn btn-default" title="刷新">
-											<i class="fa fa-refresh"></i> 刷新
-										</button>
-									</div>
+											<button type="button" class="btn btn-default" title="新建" onclick="location.href='${pageContext.request.contextPath}/user/saveUI'">
+												<i class="fa fa-file-o"></i> 新建
+											</button>
+                                        
+											<button type="button" class="btn btn-default" title="刷新">
+												<i class="fa fa-refresh"></i> 刷新
+											</button>
+											<button type="button" class="btn btn-danger" id="batchDelBtn">
+												<i class="fa fa-trash"></i> 批量删除
+											</button>
+										</div>
 								</div>
 							</div>
 							<div class="box-tools pull-right">
-								<div class="has-feedback">
-									<input type="text" class="form-control input-sm"
-										placeholder="搜索"> <span
-										class="glyphicon glyphicon-search form-control-feedback"></span>
-								</div>
+								<form class="has-feedback" action="${pageContext.request.contextPath}/user/findAll.do" method="get">
+									<input type="text" name="q" value="${q}" class="form-control input-sm" placeholder="搜索用户名或邮箱"> 
+									<input type="hidden" name="page" value="1" />
+									<span class="glyphicon glyphicon-search form-control-feedback"></span>
+								</form>
 							</div>
 							<!--工具栏/-->
 
 							<!--数据列表-->
+							<form id="batchForm" method="post" action="${pageContext.request.contextPath}/user/batchDel">
 							<table id="dataList"
 								class="table table-bordered table-striped table-hover dataTable">
 								<thead>
@@ -155,29 +160,42 @@
 								<tbody>
 
 								<c:forEach items="${userList}" var="user">
-									<tr>
-										<td><input name="ids" type="checkbox"></td>
-										<td>${user.id}</td>
-										<td>${user.username}</td>
-										<td>${user.email}</td>
-										<td>${user.phoneNum}</td>
-										<td class="text-center">
-											<c:forEach items="${user.roles}" var="role">
-											&nbsp;&nbsp;${role.roleName}
-										</c:forEach>
-										</td>
-										<td class="text-center">
-											<a href="javascript:void(0);" onclick="delUser('${user.id}')" class="btn bg-olive btn-xs">删除</a>
-										</td>
-									</tr>
+										<tr>
+											<td><input name="ids" type="checkbox" value="${user.id}"></td>
+											<td>${user.id}</td>
+											<td>${user.username}</td>
+											<td>${user.email}</td>
+											<td>${user.phoneNum}</td>
+											<td class="text-center">
+												<c:forEach items="${user.roles}" var="role">
+													&nbsp;&nbsp;${role.roleName}
+												</c:forEach>
+											</td>
+											<td class="text-center">
+												<a href="${pageContext.request.contextPath}/user/saveUI?id=${user.id}" class="btn btn-primary btn-xs" style="margin-right:6px;">编辑</a>
+												<a href="javascript:void(0);" onclick="delUser('${user.id}')" class="btn bg-olive btn-xs">删除</a>
+											</td>
+										</tr>
 								</c:forEach>
 								</tbody>
 
 							</table>
+							</form>
 							<!--数据列表/-->
 
 						</div>
 						<!-- 数据表格 /-->
+
+						<!-- 分页控件 -->
+						<div class="text-center" style="margin-top:10px;">
+							<c:if test="${total > 0}">
+								<ul class="pagination">
+									<c:forEach begin="1" end="${totalPages}" var="i">
+										<li class="${i == page ? 'active' : ''}"><a href="${pageContext.request.contextPath}/user/findAll.do?page=${i}&size=${size}&q=${fn:escapeXml(q)}">${i}</a></li>
+									</c:forEach>
+								</ul>
+							</c:if>
+						</div>
 
 					</div>
 					<!-- /.box-body -->
@@ -306,6 +324,20 @@
 													$(this).data("clicks",
 															!clicks);
 												});
+
+									// batch delete handler
+									$(document).on('click', '#batchDelBtn', function() {
+										var ids = [];
+										$("#dataList input[name='ids']:checked").each(function(){ ids.push($(this).val()); });
+										if (ids.length === 0) { alert('请先选择要删除的项'); return; }
+										if (!confirm('确认删除选中的 ' + ids.length + ' 项？')) return;
+										var $form = $('#batchForm');
+										$form.find("input[name='ids']").prop('disabled', true);
+										for (var i=0;i<ids.length;i++) {
+											$form.append($('<input>').attr('type','hidden').attr('name','ids').val(ids[i]));
+										}
+										$form.submit();
+									});
 							});
 		</script>
 </body>

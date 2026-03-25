@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -118,26 +119,30 @@
 							<div class="pull-left">
 								<div class="form-group form-inline">
 									<div class="btn-group">
-										<button type="button" class="btn btn-default" title="新建" onclick="location.href='${pageContext.request.contextPath}/pages/role-add.jsp'">
-											<i class="fa fa-file-o"></i> 新建
-										</button>
-										
-										<button type="button" class="btn btn-default" title="刷新">
-											<i class="fa fa-refresh"></i> 刷新
-										</button>
-									</div>
+											<button type="button" class="btn btn-default" title="新建" onclick="location.href='${pageContext.request.contextPath}/role/saveUI'">
+												<i class="fa fa-file-o"></i> 新建
+											</button>
+                                        
+											<button type="button" class="btn btn-default" title="刷新">
+												<i class="fa fa-refresh"></i> 刷新
+											</button>
+											<button type="button" class="btn btn-danger" id="batchDelBtn">
+												<i class="fa fa-trash"></i> 批量删除
+											</button>
+										</div>
 								</div>
 							</div>
 							<div class="box-tools pull-right">
-								<div class="has-feedback">
-									<input type="text" class="form-control input-sm"
-										placeholder="搜索"> <span
-										class="glyphicon glyphicon-search form-control-feedback"></span>
-								</div>
+								<form class="has-feedback" action="${pageContext.request.contextPath}/role/findAll.do" method="get">
+									<input type="text" name="q" value="${q}" class="form-control input-sm" placeholder="搜索角色名称或描述"> 
+									<input type="hidden" name="page" value="1" />
+									<span class="glyphicon glyphicon-search form-control-feedback"></span>
+								</form>
 							</div>
 							<!--工具栏/-->
 
 							<!--数据列表-->
+							<form id="batchForm" method="post" action="${pageContext.request.contextPath}/role/batchDel">
 							<table id="dataList"
 								class="table table-bordered table-striped table-hover dataTable">
 								<thead>
@@ -154,11 +159,12 @@
 								<tbody>
 									<c:forEach items="${roleList}" var="role">
 										<tr>
-											<td><input name="ids" type="checkbox"></td>
+											<td><input name="ids" type="checkbox" value="${role.id}"></td>
 											<td>${role.id}</td>
 											<td>${role.roleName}</td>
 											<td>${role.roleDesc}</td>
 											<td class="text-center">
+												<a href="${pageContext.request.contextPath}/role/saveUI?id=${role.id}" class="btn btn-primary btn-xs" style="margin-right:6px;">编辑</a>
 												<a href="#" class="btn bg-olive btn-xs" onclick="delRole('${role.id}')" >删除</a>
 											</td>
 										</tr>
@@ -166,10 +172,22 @@
 								</tbody>
 
 							</table>
+							</form>
 							<!--数据列表/-->
 
 						</div>
 						<!-- 数据表格 /-->
+
+						<!-- 分页控件 -->
+						<div class="text-center" style="margin-top:10px;">
+							<c:if test="${total > 0}">
+								<ul class="pagination">
+									<c:forEach begin="1" end="${totalPages}" var="i">
+										<li class="${i == page ? 'active' : ''}"><a href="${pageContext.request.contextPath}/role/findAll.do?page=${i}&size=${size}&q=${fn:escapeXml(q)}">${i}</a></li>
+									</c:forEach>
+								</ul>
+							</c:if>
+						</div>
 
 					</div>
 					<!-- /.box-body -->
@@ -296,6 +314,22 @@
 													$(this).data("clicks",
 															!clicks);
 												});
+
+									// batch delete handler
+									$(document).on('click', '#batchDelBtn', function() {
+										var ids = [];
+										$("#dataList input[name='ids']:checked").each(function(){ ids.push($(this).val()); });
+										if (ids.length === 0) { alert('请先选择要删除的项'); return; }
+										if (!confirm('确认删除选中的 ' + ids.length + ' 项？')) return;
+										// create form and submit
+										var $form = $('#batchForm');
+										// ensure inputs are present
+										$form.find("input[name='ids']").prop('disabled', true);
+										for (var i=0;i<ids.length;i++) {
+											$form.append($('<input>').attr('type','hidden').attr('name','ids').val(ids[i]));
+										}
+										$form.submit();
+									});
 							});
 		</script>
 </body>

@@ -142,4 +142,38 @@
     text-decoration: none
 }
 
+/* Pixel tweaks to better match screenshots */
+.content-wrapper .box {
+	padding: 10px 12px;
+}
+.box-title {
+	font-weight: 700;
+	font-size: 16px;
+}
+.table-box table.dataTable th, .table-box table.dataTable td {
+	padding: 8px 12px;
+	vertical-align: middle;
+}
+.table-box table.dataTable tbody tr td {
+	height: 44px;
+}
+.btn.bg-maroon {
+	background: #a52a2a;
+	color: #fff;
+	border-color: #8b2323;
+}
+.btn.bg-maroon:hover { background: #8b1f1f; }
+.btn.bg-olive {
+	background: #3c8dbc;
+	color: #fff;
+	border-color: #367fa9;
+}
+.btn.bg-olive:hover { background: #337ab7; }
+.pagination > li > a { padding: 6px 10px; margin: 0 3px; border-radius: 3px; }
+.text-danger { color: #d9534f; font-size: 12px; display: block; margin-top: 4px; }
+#dataList input[type="checkbox"] { width: 16px; height: 16px; }
+
+/* Form labels alignment */
+.data-type .title { text-align: right; padding-right: 18px; }
+
 
