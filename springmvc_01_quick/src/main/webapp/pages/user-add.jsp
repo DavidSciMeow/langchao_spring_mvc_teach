@@ -102,7 +102,7 @@
 
 						<div class="col-md-2 title">用户名称</div>
 						<div class="col-md-4 data">
-							<input type="hidden" name="id" value="${user.id}${param.id}" />
+							<input type="hidden" name="id" value="${param.id != null ? param.id : (user != null ? user.id : '')}" />
 							<input type="text" class="form-control" name="username"
 								placeholder="用户名称" value="${param.username != null ? param.username : (user != null ? user.username : '')}"
 								data-toggle="tooltip" data-placement="top" title="${errors.username}">

@@ -76,10 +76,17 @@ public class UserController {
             errors.put("username", "用户名不能超过50个字符");
         }
 
-        if (password == null || password.trim().isEmpty()) {
-            errors.put("password", "密码为必填项");
-        } else if (password.length() < 6) {
-            errors.put("password", "密码长度至少为6位");
+        if (id == null) {
+            if (password == null || password.trim().isEmpty()) {
+                errors.put("password", "密码为必填项");
+            } else if (password.length() < 6) {
+                errors.put("password", "密码长度至少为6位");
+            }
+        } else {
+            // 更新时：如果用户填写了密码则校验长度；若未填写则保留原密码
+            if (password != null && !password.trim().isEmpty() && password.length() < 6) {
+                errors.put("password", "密码长度至少为6位");
+            }
         }
 
         if (email != null && !email.trim().isEmpty()) {
@@ -97,7 +104,15 @@ public class UserController {
         SysUser u = new SysUser();
         if (id != null) u.setId(id);
         u.setUsername(username.trim());
-        u.setPassword(password);
+        // 如果是更新且未填写密码，则从数据库读取原密码并保留
+        String finalPassword = password;
+        if (id != null) {
+            SysUser existing = userService.findById(id);
+            if (existing != null && (finalPassword == null || finalPassword.trim().isEmpty())) {
+                finalPassword = existing.getPassword();
+            }
+        }
+        u.setPassword(finalPassword);
         u.setEmail(email == null ? null : email.trim());
         u.setPhoneNum(phoneNum == null ? null : phoneNum.trim());
         if (id == null) {
