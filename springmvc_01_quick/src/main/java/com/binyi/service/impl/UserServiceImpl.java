@@ -62,8 +62,8 @@ public class UserServiceImpl {
     public void save(SysUser u, Long[] roleIds) {
         logger.debug("Saving user: {}", u.getUsername());
         userDao.save(u);
-        Long userId = userDao.getLastInsertId();
-        if (roleIds != null) {
+        Long userId = u.getId();
+        if (userId != null && userId > 0 && roleIds != null) {
             for (Long r : roleIds) {
                 userDao.addUserRole(userId, r);
             }

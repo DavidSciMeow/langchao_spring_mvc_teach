@@ -3,6 +3,13 @@ package com.binyi.dao.impl;
 import com.binyi.domain.SysUser;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,8 +64,25 @@ public class UserDaoImpl {
     }
 
     public int save(SysUser u) {
-        String sql = "INSERT INTO sys_user(username, email, password, phoneNum) VALUES(?,?,?,?)";
-        return jdbcTemplate.update(sql, u.getUsername(), u.getEmail(), u.getPassword(), u.getPhoneNum());
+        final String sql = "INSERT INTO sys_user(username, email, password, phoneNum) VALUES(?,?,?,?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection con) throws java.sql.SQLException {
+                PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, u.getUsername());
+                ps.setString(2, u.getEmail());
+                ps.setString(3, u.getPassword());
+                ps.setString(4, u.getPhoneNum());
+                return ps;
+            }
+        }, keyHolder);
+        Number key = keyHolder.getKey();
+        if (key != null) {
+            u.setId(key.longValue());
+        }
+        // return 1 to indicate one row inserted (jdbcTemplate.update returned via PreparedStatementCreator doesn't provide count here)
+        return (key == null) ? 0 : 1;
     }
 
     public Long getLastInsertId() {
