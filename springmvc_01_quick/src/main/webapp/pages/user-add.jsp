@@ -78,7 +78,7 @@
 
 			<!-- 内容头部 -->
 			<section class="content-header">
-		h1>
+		<h1>
 			用户管理 <small>用户表单</small>
 		</h1>
 		<ol class="breadcrumb">
